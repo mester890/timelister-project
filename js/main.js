@@ -18,11 +18,68 @@ db.collection("employees").get().then((querySnapshot) => {
     querySnapshot.forEach((doc) => {
         id = doc.id;
         d = doc.data();
-        $('#list_tbl tr:last').after('<tr><th>' + d.firstname + '</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>');
+        $('#list_tbl tr:last').after('<tr><th>' + d.firstname + '</th><td id="' + id + '_1"></td><td id="' + id + '_2"></td><td id="' + id + '_3"></td><td id="' + id + '_4"></td><td id="' + id + '_5"></td><td id="' + id + '_6"></td><td id="' + id + '_total"></td></tr>');
 
-        // Call second function to get days the employee is going to work, based on wich week (getUrlParams(url).week) -> query based on id from employee. using the reference from firestore.
+        //populates select-form on addWork.html -> page
+        $('#emp_list_sel option:last').after('<option>' + d.username + '</option>');
+
+
+        //checks if the week is defined, if not -> nothing happens.
+        if (getUrlParams().week) {
+          fillColumns(d.username);
+          fillDates();
+        } else {
+          return;
+        }
     });
+    if (getUrlParams().week) {
+      fillDates();
+    } else {
+      return;
+    }
 });
+
+function addWork() {
+  var username = $('#emp_list_sel').find(":selected").text();
+  var hours = $('#emp_hours').val();
+
+  var week = $('#emp_week').val();
+  debugger;
+/*
+  db.collection('lists').doc().set({
+    date: date,
+    hours: hours,
+    username: username,
+    week: week
+  });
+*/
+}
+function fillDates() {
+  week = getUrlParams().week;
+  console.log(getDateOfWeek(week, new Date().getFullYear()));
+}
+function getDateOfWeek(w, y) {
+    var d = (1 + (w - 1) * 7); // 1st of January + 7 days for each week
+
+    return new Date(y, 0, d);
+}
+
+function fillColumns(username) {
+  var week = getUrlParams().week;
+  db.collection("lists")
+    .where("week", "==", week).where("username", "==", username)
+    .onSnapshot(function(snapshot) {
+        snapshot.forEach(function (doc) {
+            d = doc.data();
+            date = d.date.toDate();
+            day = date.getDay();
+            $("#" + username + "_" + day).css('background-color', 'green');
+        });
+    });
+}
+
+
+
 
 function getUrlParams(url) {
   var queryString = url ? url.split('?')[1] : window.location.search.slice(1);

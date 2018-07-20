@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
+
+    <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase.js"></script>
+    <script>
+      var config = {
+        apiKey: "AIzaSyBlymhmnwDB8VFO_EVv2MJMdFq_JfOTFcY",
+        authDomain: "timelister-63004.firebaseapp.com",
+        databaseURL: "https://timelister-63004.firebaseio.com",
+        projectId: "timelister-63004",
+        storageBucket: "timelister-63004.appspot.com",
+        messagingSenderId: "51995098056"
+      };
+      firebase.initializeApp(config);
+    </script>
+    <script
+      src="http://code.jquery.com/jquery-3.3.1.js"
+      integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+      crossorigin="anonymous"></script>
+    <title></title>
+  </head>
+  <body>
+    <div class="container">
+      <form class="form">
+        <select id="emp_list_sel">
+          <option>Velg Ansatt</option>
+        </select>
+        <input type="text" name="" value="" id="emp_hours">
+        <input type="datetime-local" name="" value="" id="emp_date">
+        <input type="text" name="" value="" id="emp_week">
+        <button type="button" name="button" onclick="addWork()"> Register Work </button>
+      </form>
+    </div>
+    <script src="js/main.js" charset="utf-8"></script>
+  </body>
+</html>
