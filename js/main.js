@@ -22,12 +22,12 @@ db.collection("employees").get().then((querySnapshot) => {
         $('#list_tbl tr:last').after(
           `<tr>
             <th> ${d.firstname} </th>
-            <td id="${id}_1" class="data_cell" data-day="1" data-employee="${d.username}" data-busy="false" onclick="getCellData(this)">x</td>
-            <td id="${id}_2" class="data_cell" data-day="2" data-employee="${d.username}" data-busy="false" onclick="getCellData(this)">x</td>
-            <td id="${id}_3" class="data_cell" data-day="3" data-employee="${d.username}" data-busy="false" onclick="getCellData(this)">x</td>
-            <td id="${id}_4" class="data_cell" data-day="4" data-employee="${d.username}" data-busy="false" onclick="getCellData(this)">x</td>
-            <td id="${id}_5" class="data_cell" data-day="5" data-employee="${d.username}" data-busy="false" onclick="getCellData(this)">x</td>
-            <td id="${id}_6" class="data_cell" data-day="6" data-employee="${d.username}" data-busy="false" onclick="getCellData(this)">x</td>
+            <td id="${id}_1" class="data_cell" data-day="1" data-employee="${d.username}" data-docid="null" data-date="null" data-busy="false" onclick="getCellData(this)"></td>
+            <td id="${id}_2" class="data_cell" data-day="2" data-employee="${d.username}" data-docid="null" data-date="null" data-busy="false" onclick="getCellData(this)"></td>
+            <td id="${id}_3" class="data_cell" data-day="3" data-employee="${d.username}" data-docid="null" data-date="null" data-busy="false" onclick="getCellData(this)"></td>
+            <td id="${id}_4" class="data_cell" data-day="4" data-employee="${d.username}" data-docid="null" data-date="null" data-busy="false" onclick="getCellData(this)"></td>
+            <td id="${id}_5" class="data_cell" data-day="5" data-employee="${d.username}" data-docid="null" data-date="null" data-busy="false" onclick="getCellData(this)"></td>
+            <td id="${id}_6" class="data_cell" data-day="6" data-employee="${d.username}" data-docid="null" data-date="null" data-busy="false" onclick="getCellData(this)"></td>
             <td id="${id}_total" class="data_cell"></td>
           </tr>`);
 
@@ -38,16 +38,10 @@ db.collection("employees").get().then((querySnapshot) => {
         //checks if the week is defined, if not -> nothing happens.
         if (getUrlParams().week) {
           fillColumns(d.username);
-          fillDates();
-        } else {
+          fillDates(d.username);
           return;
         }
     });
-    if (getUrlParams().week) {
-      fillDates();
-    } else {
-      return;
-    }
 });
 
 function getCellData(e) {
@@ -56,34 +50,54 @@ function getCellData(e) {
   var day = $(e).attr('data-day');
   console.log(isBusy);
   if(isBusy == 'true') {
-    console.log(employee + " is already booked for this day");
-  } else {
-    console.log('open modal to add new booking for day: ' + day);
+    removeWork(e);
+  } else if(isBusy == 'false') {
+    addWork(day, e);
     // date = calc from week and day nr.
   }
 }
 
-function addWork() {
-  var username = $('#emp_list_sel').find(":selected").text();
-  var hours = $('#emp_hours').val();
-
-  var week = $('#emp_week').val();
-  debugger;
-/*
+function addWork(day, e) {
+  week = getUrlParams().week;
+  date = $(e).attr('data-date');
+  employee = $(e).attr('data-employee');
+  if (day == 6) { hours = 6 } else { hours = 8 };
+  console.log("add-work - " + date);
   db.collection('lists').doc().set({
     date: date,
     hours: hours,
-    username: username,
+    username: employee,
     week: week
   });
-*/
 }
 
-// TODO: Make function for filling day names and dates in table header
-// TODO: Fix date / timestamp in firebase for adding new entries
-function fillDates() {
+function removeWork(e) {
+  docid = $(e).attr('data-docid');
+  db.collection('lists').doc(docid).delete();
+  $(e).css('background-color', 'inherit');
+  $(e).attr('data-busy', 'false');
+}
+
+function fillDates(username) {
   week = getUrlParams().week;
+  daterange = getDateRangeOfWeek(week);
+  $('#daterange').html('UKE: ' + week + "<br>" + $.format.date(new Date(daterange[0]), "dd-MM-yyyy") + " - " + $.format.date(new Date(daterange[1]), "dd-MM-yyyy"));
   //console.log(getDateOfWeek(week, new Date().getFullYear()));
+  datesArray = getDates(new Date(daterange[0]), new Date(daterange[1]));
+  $("#d_1").html($.format.date(new Date(datesArray[0]), "ddd <br> dd/MM-yyyy"));
+  $("#d_2").html($.format.date(new Date(datesArray[1]), "ddd <br> dd/MM-yyyy"));
+  $("#d_3").html($.format.date(new Date(datesArray[2]), "ddd <br> dd/MM-yyyy"));
+  $("#d_4").html($.format.date(new Date(datesArray[3]), "ddd <br> dd/MM-yyyy"));
+  $("#d_5").html($.format.date(new Date(datesArray[4]), "ddd <br> dd/MM-yyyy"));
+  $("#d_6").html($.format.date(new Date(datesArray[5]), "ddd <br> dd/MM-yyyy"));
+
+  $('#' + username + "_1").attr('data-date', $.format.date(new Date(datesArray[0]), "yyyy-MM-dd"));
+  $('#' + username + "_2").attr('data-date', $.format.date(new Date(datesArray[1]), "yyyy-MM-dd"));
+  $('#' + username + "_3").attr('data-date', $.format.date(new Date(datesArray[2]), "yyyy-MM-dd"));
+  $('#' + username + "_4").attr('data-date', $.format.date(new Date(datesArray[3]), "yyyy-MM-dd"));
+  $('#' + username + "_5").attr('data-date', $.format.date(new Date(datesArray[4]), "yyyy-MM-dd"));
+  $('#' + username + "_6").attr('data-date', $.format.date(new Date(datesArray[5]), "yyyy-MM-dd"));
+
 }
 
 
@@ -94,12 +108,64 @@ function fillColumns(username) {
     .onSnapshot(function(snapshot) {
         snapshot.forEach(function (doc) {
             d = doc.data();
-            date = d.date.toDate();
+            date = new Date(d.date);
+            console.log(date);
             day = date.getDay();
             $("#" + username + "_" + day).css('background-color', 'green');
             $("#" + username + "_" + day).attr('data-busy', 'true');
+            $("#" + username + "_" + day).attr('data-docid', doc.id);
         });
     });
+}
+
+
+function weekDateToDate (year, week, day) {
+  const firstDayOfYear = new Date(year, 0, 1)
+  const days = 2 + day + (week - 1) * 7 - firstDayOfYear.getDay()
+  return new Date(year, 0, days)
+}
+
+
+function getDateRangeOfWeek(weekNo){
+    var d1 = new Date();
+    numOfdaysPastSinceLastMonday = eval(d1.getDay()- 1);
+    d1.setDate(d1.getDate() - numOfdaysPastSinceLastMonday);
+    var weekNoToday = d1.getWeek();
+    var weeksInTheFuture = eval( weekNo - weekNoToday );
+    d1.setDate(d1.getDate() + eval( 7 * weeksInTheFuture ));
+    var rangeIsFrom =  eval(d1.getMonth()+1) + "/" + d1.getDate()  + "/" + d1.getFullYear();
+    var rangeIsFromDate = d1.getDate();
+    d1.setDate(d1.getDate() + 5);
+    var rangeIsTo = eval(d1.getMonth()+1) + "/" + d1.getDate() + "/" + d1.getFullYear() ;
+    var rangeIsToDate = d1.getDate();
+    var dates = [rangeIsFrom, rangeIsTo]
+    return dates;
+
+    //return rangeIsFrom + " - " + rangeIsTo;
+};
+
+Date.prototype.addDays = function(days) {
+    var dat = new Date(this.valueOf())
+    dat.setDate(dat.getDate() + days);
+    return dat;
+}
+
+function getDates(startDate, stopDate) {
+   var dateArray = new Array();
+   var currentDate = startDate;
+   while (currentDate <= stopDate) {
+     dateArray.push(currentDate)
+     currentDate = currentDate.addDays(1);
+   }
+   return dateArray;
+ }
+
+
+
+
+Date.prototype.getWeek = function() {
+var onejan = new Date(this.getFullYear(),0,1);
+return Math.ceil((((this - onejan) / 86400000) + onejan.getDay()+1)/7);
 }
 
 
