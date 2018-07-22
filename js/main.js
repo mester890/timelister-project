@@ -13,12 +13,23 @@ db.collection("employees").get().then((querySnapshot) => {
 });
 
 
+
 // populating lists of working hours
 db.collection("employees").get().then((querySnapshot) => {
     querySnapshot.forEach((doc) => {
         id = doc.id;
         d = doc.data();
-        $('#list_tbl tr:last').after('<tr><th>' + d.firstname + '</th><td id="' + id + '_1"></td><td id="' + id + '_2"></td><td id="' + id + '_3"></td><td id="' + id + '_4"></td><td id="' + id + '_5"></td><td id="' + id + '_6"></td><td id="' + id + '_total"></td></tr>');
+        $('#list_tbl tr:last').after(
+          `<tr>
+            <th> ${d.firstname} </th>
+            <td id="${id}_1" class="data_cell" data-day="1" data-employee="${d.username}" data-busy="false" onclick="getCellData(this)">x</td>
+            <td id="${id}_2" class="data_cell" data-day="2" data-employee="${d.username}" data-busy="false" onclick="getCellData(this)">x</td>
+            <td id="${id}_3" class="data_cell" data-day="3" data-employee="${d.username}" data-busy="false" onclick="getCellData(this)">x</td>
+            <td id="${id}_4" class="data_cell" data-day="4" data-employee="${d.username}" data-busy="false" onclick="getCellData(this)">x</td>
+            <td id="${id}_5" class="data_cell" data-day="5" data-employee="${d.username}" data-busy="false" onclick="getCellData(this)">x</td>
+            <td id="${id}_6" class="data_cell" data-day="6" data-employee="${d.username}" data-busy="false" onclick="getCellData(this)">x</td>
+            <td id="${id}_total" class="data_cell"></td>
+          </tr>`);
 
         //populates select-form on addWork.html -> page
         $('#emp_list_sel option:last').after('<option>' + d.username + '</option>');
@@ -39,6 +50,19 @@ db.collection("employees").get().then((querySnapshot) => {
     }
 });
 
+function getCellData(e) {
+  var isBusy = $(e).attr('data-busy');
+  var employee = $(e).attr('data-employee');
+  var day = $(e).attr('data-day');
+  console.log(isBusy);
+  if(isBusy == 'true') {
+    console.log(employee + " is already booked for this day");
+  } else {
+    console.log('open modal to add new booking for day: ' + day);
+    // date = calc from week and day nr.
+  }
+}
+
 function addWork() {
   var username = $('#emp_list_sel').find(":selected").text();
   var hours = $('#emp_hours').val();
@@ -54,15 +78,14 @@ function addWork() {
   });
 */
 }
+
+// TODO: Make function for filling day names and dates in table header
+// TODO: Fix date / timestamp in firebase for adding new entries
 function fillDates() {
   week = getUrlParams().week;
-  console.log(getDateOfWeek(week, new Date().getFullYear()));
+  //console.log(getDateOfWeek(week, new Date().getFullYear()));
 }
-function getDateOfWeek(w, y) {
-    var d = (1 + (w - 1) * 7); // 1st of January + 7 days for each week
 
-    return new Date(y, 0, d);
-}
 
 function fillColumns(username) {
   var week = getUrlParams().week;
@@ -74,11 +97,10 @@ function fillColumns(username) {
             date = d.date.toDate();
             day = date.getDay();
             $("#" + username + "_" + day).css('background-color', 'green');
+            $("#" + username + "_" + day).attr('data-busy', 'true');
         });
     });
 }
-
-
 
 
 function getUrlParams(url) {
